@@ -2,7 +2,6 @@ from math import ceil
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select, func
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload, selectinload
 
@@ -185,4 +184,4 @@ async def delete_movie(movie_id: int, db: AsyncSession = Depends(get_db)):
 
     await db.delete(db_movie)
     await db.commit()
-    return {"detail": "Movie with the given ID was not found."}
+    return None

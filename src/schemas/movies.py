@@ -1,12 +1,13 @@
-import datetime
+from datetime import date, timedelta
+from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class CountrySchema(BaseModel):
     id: int
     code: str
-    name: str | None = None
+    name: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -20,10 +21,17 @@ class ItemSchema(BaseModel):
 
 class MovieItem(BaseModel):
     id: int
-    name: str
-    date: datetime.date
-    score: float
+    name: str = Field(max_length=255)
+    date: date
+    score: float = Field(ge=0, le=100)
     overview: str
+
+    @field_validator("date")
+    @classmethod
+    def validate_date(cls, value: date):
+        if value > date.today() + timedelta(days=365):
+            raise ValueError("Date cannot be more than 1 year in the future.")
+        return value
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -42,31 +50,45 @@ class MovieDetailSchema(MovieItem):
 
 class MovieListResponseSchema(BaseModel):
     movies: list[MovieItem]
-    prev_page: str | None = None
-    next_page: str | None = None
+    prev_page: Optional[str] = None
+    next_page: Optional[str] = None
     total_pages: int
     total_items: int
 
 
 class MovieCreateSchema(BaseModel):
-    name: str
-    date: datetime.date
-    score: float
+    name: str = Field(max_length=255)
+    date: date
+    score: float = Field(ge=0, le=100)
     overview: str
     status: str
-    budget: float
-    revenue: float
+    budget: float = Field(ge=0)
+    revenue: float = Field(ge=0)
     country: str
     genres: list[str] = Field(default_factory=list)
     actors: list[str] = Field(default_factory=list)
     languages: list[str] = Field(default_factory=list)
 
+    @field_validator("date")
+    @classmethod
+    def validate_date(cls, value: date):
+        if value > date.today() + timedelta(days=365):
+            raise ValueError("Date cannot be more than 1 year in the future.")
+        return value
+
 
 class MovieUpdateSchema(BaseModel):
-    name: str | None = None
-    date: datetime.date | None = None
-    score: float | None = None
-    overview: str | None = None
-    status: str | None = None
-    budget: float | None = None
-    revenue: float | None = None
+    name: Optional[str] = Field(default=None, max_length=255)
+    date: Optional[date] = None
+    score: Optional[float] = Field(default=None, ge=0, le=100)
+    overview: Optional[str] = None
+    status: Optional[str] = None
+    budget: Optional[float] = Field(default=None, ge=0)
+    revenue: Optional[float] = Field(default=None, ge=0)
+
+    @field_validator("date")
+    @classmethod
+    def validate_date(cls, value: Optional[date]):
+        if value is not None and value > date.today() + timedelta(days=365):
+            raise ValueError("Date cannot be more than 1 year in the future.")
+        return value
