@@ -4,15 +4,17 @@ FROM python:3.10
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV PIP_NO_CACHE_DIR=off
-ENV ALEMBIC_CONFIG = /usr/src/alembic/alembic.ini
+ENV ALEMBIC_CONFIG=/usr/src/alembic/alembic.ini
 
-# Installing dependencies
+# Installing dependencies (добавили cargo и rustc для сборки pydantic-core)
 RUN apt update && apt install -y \
     gcc \
     libpq-dev \
     netcat-openbsd \
     postgresql-client \
     dos2unix \
+    cargo \
+    rustc \
     && apt clean
 
 # Install Poetry
